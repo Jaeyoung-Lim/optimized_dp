@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 def CylinderShape(grid, ignore_dims, center, radius):
     """Creates an axis align cylinder implicit surface function
@@ -38,6 +39,27 @@ def CylinderShape(grid, ignore_dims, center, radius):
 #                                   -x3 + range[3][0], x3 - range[3][1]]
 #                     data[i0, i1, i2, i3] = min(range_list)
 #     return data
+
+def LoiterPath(grid, ignore_dims, center, radius):
+    """Creates an axis align cylinder implicit surface function
+
+    Args:
+        grid (Grid): Grid object
+        ignore_dims (List) : List  specifing axis where cylindar is aligned (0-indexed)
+        center (List) :  List specifying the center of cylinder
+        radius (float): Radius of cylinder
+
+    Returns:
+        np.ndarray: implicit surface function of the cylinder
+    """
+    data = np.zeros(grid.pts_each_dim)
+    for i in range(grid.dims):
+        if i not in ignore_dims:
+            # This works because of broadcasting
+            data = data + np.power(grid.vs[i] - center[i], 2)
+    #data = np.sqrt(data) - radius
+    theta_star = np.arctan2(grid.vs[1] - center[1], grid.vs[0] - center[0])
+    return data - radius*radius + np.power(theta_star - grid.vs[2], 2)
 
 def ShapeRectangle(grid, target_min, target_max):
     data = np.maximum(grid.vs[0] - target_max[0], -grid.vs[0] + target_min[0])
